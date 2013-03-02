@@ -27,7 +27,7 @@ public class Matrix {
 		for (int i=0; i<this.coordinates.length; i++)
 			this.coordinates[i] = new Couple<Integer>(-1, -1);
 	}
-
+	
 	public int[][] getMatrix() {
 		return matrix;
 	}
@@ -62,6 +62,14 @@ public class Matrix {
 
 	public int getCURRENT() {
 		return CURRENT;
+	}
+
+	public Couple<Integer>[] getCoordinates() {
+		return coordinates;
+	}
+
+	public void setCoordinates(Couple<Integer>[] coordinates) {
+		this.coordinates = coordinates;
 	}
 
 	/** Inserisce un nuovo tetromino nella matrice **/
