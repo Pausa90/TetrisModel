@@ -1,7 +1,8 @@
 package it.andclaval.tetris.render;
 
+import java.util.Scanner;
+
 public class TextRendering {
-	
 	
 	public void rendering(int[][] matrix){
 
@@ -27,6 +28,11 @@ public class TextRendering {
 		System.out.println();
 	}
 	
+	public String input(){
+		Scanner scannerDiLinee = new Scanner(System.in);	
+		return scannerDiLinee.nextLine();
+	}
 	
+
 	
 }

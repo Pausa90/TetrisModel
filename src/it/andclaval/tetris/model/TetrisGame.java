@@ -70,7 +70,7 @@ public class TetrisGame {
 	
 	/** Se il pezzo deve cadere giù **/
 	public void freeFall(){
-		
+		/******************************************************* da fare ************************************/
 	}
 
 	/* da inserire una creazione con probabilità */
