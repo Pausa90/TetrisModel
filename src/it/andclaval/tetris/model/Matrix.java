@@ -29,6 +29,7 @@ public class Matrix {
 		this.coordinates = new Couple[4];
 		for (int i=0; i<this.coordinates.length; i++)
 			this.coordinates[i] = new Couple<Integer>(-1, -1);
+		this.pivotTetromino = -1;
 	}
 
 	public int[][] getMatrix() {
