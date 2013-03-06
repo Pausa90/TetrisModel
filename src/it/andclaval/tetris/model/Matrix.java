@@ -20,6 +20,9 @@ public class Matrix {
 	//Coordinate del pezzo
 	private Couple<Integer>[] coordinates;
 
+	private String currentTetromino;
+	private int pivotTetromino;
+
 	public Matrix(TetrisGame game){
 		this.game = game;
 		this.setMatrix(new int[ROW][COLUMN]);
@@ -27,7 +30,7 @@ public class Matrix {
 		for (int i=0; i<this.coordinates.length; i++)
 			this.coordinates[i] = new Couple<Integer>(-1, -1);
 	}
-	
+
 	public int[][] getMatrix() {
 		return matrix;
 	}
@@ -92,17 +95,26 @@ public class Matrix {
 		int beginCell = 4;
 		int[][] shape = next.getShape();
 		int pCoord = 0; //puntatore all'array di coordinate
+		Couple<Integer> pivot = next.getPivot();
+		int pivot_row = pivot.getFirst();
+		int pivot_column = pivot.getSecond();
+
 		for (int i=0; i<shape[0].length; i++){
 			if (shape[0][i] == this.CURRENT){
 				this.coordinates[pCoord].setCouple(0,beginCell+i);
+				if (i == pivot_column && pivot_row == 0)
+					this.pivotTetromino = pCoord;
 				pCoord++;
 			}
 			if (shape[1][i] == this.CURRENT){
 				this.coordinates[pCoord].setCouple(1,beginCell+i);
+				if (i == pivot_column && pivot_row == 1)
+					this.pivotTetromino = pCoord;
 				pCoord++;
 			}
-			
+
 		}
+		this.currentTetromino = next.getClass().getName();
 	}
 
 	/** Controllo se la posizione è libera per inserire/muovere il tetromino **/
@@ -153,62 +165,70 @@ public class Matrix {
 			this.matrix[coord.getFirst()][coord.getSecond()] = status;	
 	}
 
-	
+	/************************************** TODO ottimizzabile con solo il pivot (senza fromTo) ***********************/
 	/** Aggiornamento della matrice al ruotare del pezzo **/
 	public void rotateCurrent(boolean clockWise){
 		Couple<Couple<Integer>> fromTo = this.getMinMaxCoordinates(); //Primo elemento coppia di righe, secondo coppia di colonne
-		
-		//verifico se il pezzo è in orizzontale o in verticale (o se è un quadrato)
-		Couple<Integer> row = fromTo.getFirst();
-		Couple<Integer> columns = fromTo.getSecond();
-		
-		int numRows = row.getSecond()-row.getFirst()+1;
-		int numColumns = columns.getSecond()-columns.getFirst()+1;
-		boolean vertical;
-		if (numRows == numColumns)
+
+		if (this.currentTetromino.equals("Tetromino_O"))
 			return;
-		else if (numRows > numColumns)	
-			vertical = true;
-		else	
-			vertical = false;
-		
-		int[][] subMatrix = this.fromPositionToSubMatrix(row, columns, vertical);  
+
+
+		int[][] subMatrix = this.fromPositionToSubMatrix();  
 		if (clockWise)
 			subMatrix = this.rotateClockWise(subMatrix);
 		else
 			subMatrix = this.rotateAntiClockWise(subMatrix);
-		
+
 		if (this.isFreeToInsertAfterRotation(subMatrix, fromTo)){
 			this.writeStatus(this.FREE);
-			this.updateCoordinatesAfterRotation(subMatrix, fromTo);
+			this.updateCoordinatesAfterRotation(subMatrix);
 			this.writeStatus(this.CURRENT);
 		}		
 	}
 
-	private void updateCoordinatesAfterRotation(int[][] subMatrix,	Couple<Couple<Integer>> fromTo) {
-		Couple<Integer> rows = fromTo.getFirst();
-		Couple<Integer> columns = fromTo.getSecond();
-		
+	private void updateCoordinatesAfterRotation(int[][] subMatrix) {
+		int startRow;
+		int startCol;
+		int pivot_r;
+		int pivot_c;
+
+		if (this.currentTetromino.equals("Tetromino_I")){ /**************************** TODO ************************/
+			startRow = 4;
+			startCol = 4;
+			pivot_r = 0;
+			pivot_c = 0;
+		}
+		else{
+			startRow = this.coordinates[this.pivotTetromino].getFirst()-1;
+			startCol = this.coordinates[this.pivotTetromino].getSecond()-1;
+			pivot_r = 1;
+			pivot_c = 1;
+		}
 		int i = 0;
-		
+
+			
 		for (int r = 0; r < subMatrix.length; r++){
 			for (int c = 0; c < subMatrix[0].length; c++){
-				
+
 				if (subMatrix[r][c] == this.CURRENT){
-					this.coordinates[i].setCouple(r+rows.getFirst(), c+columns.getFirst());
+					if (r==pivot_r && c==pivot_c)
+						this.pivotTetromino = i;
+					this.coordinates[i].setCouple(r+startRow, c+startCol);
 					i++;
 				}
 			}
 		}
 	}
 
+	/** TODO: togliere fromTo e usare il pivot **/
 	private boolean isFreeToInsertAfterRotation(int[][] subMatrix, Couple<Couple<Integer>> fromTo) {
 		Couple<Integer> rows = fromTo.getFirst();
 		Couple<Integer> columns = fromTo.getSecond();
-		
+
 		for (int r = rows.getFirst(); r < subMatrix.length; r++){
 			for (int c = columns.getFirst(); c < subMatrix[0].length; c++){
-				
+
 				if (this.matrix[r][c] == this.OCCUPIED)
 					return false;
 			}
@@ -221,14 +241,14 @@ public class Matrix {
 		int maxRow = 0;
 		int minColumn = 100;
 		int maxColumn = 0;
-		
+
 		//Preleviamo la riga minima/massima e la colonna minima/massima
 		for (Couple<Integer> c : this.coordinates){
 			if (c.getFirst() < minRow)
 				minRow = c.getFirst();
 			else if (c.getFirst() > maxRow)
 				maxRow = c.getFirst();
-			
+
 			if (c.getSecond() < minColumn)
 				minColumn = c.getSecond();
 			else if (c.getSecond() > maxColumn)
@@ -241,25 +261,53 @@ public class Matrix {
 		return couple;
 	}
 
-	private int[][] fromPositionToSubMatrix(Couple<Integer> row, Couple<Integer> columns, boolean vertical) {
-		
-		int numRows = row.getSecond()-row.getFirst()+1;
-		int numColumns = columns.getSecond()-columns.getFirst()+1;
-		
-		//Prendiamo sempre una matrice quadrata
-		if (numRows > numColumns){
-			numColumns = numRows;
+	//	private int[][] fromPositionToSubMatrix(Couple<Integer> row, Couple<Integer> columns) {
+	//		
+	//		int numRows = row.getSecond()-row.getFirst()+1;
+	//		int numColumns = columns.getSecond()-columns.getFirst()+1;
+	//		
+	//		//Prendiamo sempre una matrice quadrata
+	//		if (numRows > numColumns){
+	//			numColumns = numRows;
+	//		}
+	//		else if (numRows < numColumns){
+	//			numRows = numColumns;
+	//		}
+	//		
+	//		int[][] subMatrix = new int[numRows][numColumns];
+	//		
+	//		for (int r = row.getFirst(); r <= row.getSecond(); r++){
+	//			for (int c = columns.getFirst(); c <= columns.getSecond(); c++){
+	//				if (this.matrix[r][c]==this.CURRENT)
+	//					subMatrix[r-row.getFirst()][c-columns.getFirst()] = this.matrix[r][c];
+	//			}
+	//		}
+	//		return subMatrix;
+	//	}
+
+	private int[][] fromPositionToSubMatrix() {
+
+		int matrixDim;
+		int startRow;
+		int startCol;
+
+		if (this.currentTetromino.equals("Tetromino_I")){ /**************************** TODO ************************/
+			matrixDim = 4;
+			startRow = 4;
+			startCol = 4;
 		}
-		else if (numRows < numColumns){
-			numRows = numColumns;
+		else{
+			matrixDim = 3;
+			startRow = this.coordinates[this.pivotTetromino].getFirst()-1;
+			startCol = this.coordinates[this.pivotTetromino].getSecond()-1;
 		}
-		
-		int[][] subMatrix = new int[numRows][numColumns];
-		
-		for (int r = row.getFirst(); r <= row.getSecond(); r++){
-			for (int c = columns.getFirst(); c <= columns.getSecond(); c++){
+
+		int[][] subMatrix = new int[matrixDim][matrixDim];
+
+		for (int r = startRow; r < startRow+3; r++){
+			for (int c = startCol; c < startCol+3; c++){
 				if (this.matrix[r][c]==this.CURRENT)
-					subMatrix[r-row.getFirst()][c-columns.getFirst()] = this.matrix[r][c];
+					subMatrix[r-startRow][c-startCol] = this.matrix[r][c];
 			}
 		}
 		return subMatrix;

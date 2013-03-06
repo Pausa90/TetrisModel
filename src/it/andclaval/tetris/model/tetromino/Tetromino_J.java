@@ -1,5 +1,7 @@
 package it.andclaval.tetris.model.tetromino;
 
+import it.andclaval.tetris.tool.Couple;
+
 public class Tetromino_J extends Tetromino {
 
 	public Tetromino_J(){
@@ -13,5 +15,6 @@ public class Tetromino_J extends Tetromino {
 		shape[1][3]=this.T_OCCUPIED;
 		shape[1][2]=this.T_OCCUPIED;
 		shape[1][1]=this.T_OCCUPIED;
+		
 	}
 }

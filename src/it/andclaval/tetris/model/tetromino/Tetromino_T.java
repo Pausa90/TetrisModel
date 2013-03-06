@@ -1,5 +1,7 @@
 package it.andclaval.tetris.model.tetromino;
 
+import it.andclaval.tetris.tool.Couple;
+
 public class Tetromino_T extends Tetromino {
 
 	public Tetromino_T(){
