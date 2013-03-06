@@ -262,30 +262,6 @@ public class Matrix {
 		return couple;
 	}
 
-	//	private int[][] fromPositionToSubMatrix(Couple<Integer> row, Couple<Integer> columns) {
-	//		
-	//		int numRows = row.getSecond()-row.getFirst()+1;
-	//		int numColumns = columns.getSecond()-columns.getFirst()+1;
-	//		
-	//		//Prendiamo sempre una matrice quadrata
-	//		if (numRows > numColumns){
-	//			numColumns = numRows;
-	//		}
-	//		else if (numRows < numColumns){
-	//			numRows = numColumns;
-	//		}
-	//		
-	//		int[][] subMatrix = new int[numRows][numColumns];
-	//		
-	//		for (int r = row.getFirst(); r <= row.getSecond(); r++){
-	//			for (int c = columns.getFirst(); c <= columns.getSecond(); c++){
-	//				if (this.matrix[r][c]==this.CURRENT)
-	//					subMatrix[r-row.getFirst()][c-columns.getFirst()] = this.matrix[r][c];
-	//			}
-	//		}
-	//		return subMatrix;
-	//	}
-
 	private int[][] fromPositionToSubMatrix() {
 
 		int matrixDim;
