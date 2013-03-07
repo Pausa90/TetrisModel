@@ -70,7 +70,10 @@ public class TetrisGame {
 	
 	/** Se il pezzo deve cadere giù **/
 	public void freeFall(){
-		/******************************************************* da fare ************************************/
+		boolean isFallen;
+		do{
+			isFallen = this.matrix.update();
+		} while (isFallen);
 	}
 
 	/* da inserire una creazione con probabilità */

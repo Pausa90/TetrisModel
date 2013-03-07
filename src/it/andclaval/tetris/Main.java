@@ -20,7 +20,7 @@ public class Main {
 		
 		game.startGame();
 		render.rendering(matrix.getMatrix());
-		
+		boolean isGameOver;
 		do {
 			String command = render.input();
 			if (command.equals("left") || command.equals("s"))
@@ -48,9 +48,11 @@ public class Main {
 			else System.out.println("unknow command, try \"help\"");
 			
 			render.rendering(matrix.getMatrix());
+			isGameOver = game.isEnd();
+			
 		}
-		while(true);
-		
+		while(!isGameOver);
+		System.out.println("Game Over!");
 	}
 
 }

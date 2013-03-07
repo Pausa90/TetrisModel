@@ -1,8 +1,7 @@
 package it.andclaval.tetris.model;
 
-import java.util.zip.CheckedOutputStream;
-
 import it.andclaval.tetris.model.tetromino.Tetromino;
+import it.andclaval.tetris.model.tetromino.Tetromino_I;
 import it.andclaval.tetris.tool.Couple;
 
 public class Matrix {
@@ -22,6 +21,7 @@ public class Matrix {
 
 	private String currentTetromino;
 	private int pivotTetromino;
+	private int tetromino_i_state; 
 
 	public Matrix(TetrisGame game){
 		this.game = game;
@@ -29,7 +29,10 @@ public class Matrix {
 		this.coordinates = new Couple[4];
 		for (int i=0; i<this.coordinates.length; i++)
 			this.coordinates[i] = new Couple<Integer>(-1, -1);
+		
+		this.currentTetromino = null;
 		this.pivotTetromino = -1;
+		this.tetromino_i_state = -1;
 	}
 
 	public int[][] getMatrix() {
@@ -82,8 +85,16 @@ public class Matrix {
 		this.setInitialCoordinates(next);
 		if (!this.isFreeToInsertBelow())
 			this.game.setEnd(true);
-		else
+		else{
 			putTetrominoIntoMatrix();
+			this.currentTetromino = next.getClass().getName();
+			if (this.currentTetromino.equals("it.andclaval.tetris.model.tetromino.Tetromino_I")){
+				this.tetromino_i_state = ((Tetromino_I) next).getState();
+				this.currentTetromino = "Tetromino_I";
+			}
+			else
+				this.currentTetromino = "";
+		}
 	}
 
 	private void putTetrominoIntoMatrix() {
@@ -115,7 +126,6 @@ public class Matrix {
 			}
 
 		}
-		this.currentTetromino = next.getClass().getName();
 	}
 
 	/** Controllo se la posizione è libera per inserire/muovere il tetromino **/
@@ -127,16 +137,18 @@ public class Matrix {
 	}
 
 	/** Aggiornamento della matrice allo scattare del quanto di tempo **/
-	public void update(){
+	public boolean update(){
 		if (this.isFreeToInsertBelow()){
 			this.writeStatus(this.FREE);
 			this.updateCoordinatesBelow();
 			this.writeStatus(this.CURRENT);
+			return true;
 		}
 		else{
 			this.writeStatus(this.OCCUPIED);
 			this.cleanRows();
 			this.game.startNextTetromino();
+			return false;
 		}
 	}
 
@@ -170,12 +182,12 @@ public class Matrix {
 	/** Aggiornamento della matrice al ruotare del pezzo **/
 	public void rotateCurrent(boolean clockWise){
 		Couple<Couple<Integer>> fromTo = this.getMinMaxCoordinates(); //Primo elemento coppia di righe, secondo coppia di colonne
-
+		int[][] subMatrix;
 		if (this.currentTetromino.equals("Tetromino_O"))
 			return;
-
-
-		int[][] subMatrix = this.fromPositionToSubMatrix();  
+		else 
+			subMatrix = this.fromPositionToSubMatrix(fromTo);  
+		
 		if (clockWise)
 			subMatrix = this.rotateClockWise(subMatrix);
 		else
@@ -183,22 +195,28 @@ public class Matrix {
 
 		if (this.isFreeToInsertAfterRotation(subMatrix, fromTo)){
 			this.writeStatus(this.FREE);
-			this.updateCoordinatesAfterRotation(subMatrix);
+			this.updateCoordinatesAfterRotation(subMatrix, fromTo);
 			this.writeStatus(this.CURRENT);
-		}		
+		}
+		
 	}
 
-	private void updateCoordinatesAfterRotation(int[][] subMatrix) {
+	private void updateCoordinatesAfterRotation(int[][] subMatrix, Couple<Couple<Integer>> fromTo) {
 		int startRow;
 		int startCol;
 		int pivot_r;
 		int pivot_c;
 
 		if (this.currentTetromino.equals("Tetromino_I")){ /**************************** TODO ************************/
-			startRow = 4;
-			startCol = 4;
-			pivot_r = 0;
-			pivot_c = 0;
+			
+			Couple<Integer> startCells = this.getStartRowAndColumnForTetromino_I(fromTo);
+			startRow = startCells.getFirst();
+			startCol = startCells.getFirst();		
+		
+			pivot_r = -1;
+			pivot_c = -1;
+			
+			this.tetromino_i_state = (this.tetromino_i_state + 1) %4; 
 		}
 		else{
 			startRow = this.coordinates[this.pivotTetromino].getFirst()-1;
@@ -222,7 +240,7 @@ public class Matrix {
 		}
 	}
 
-	/** TODO: togliere fromTo e usare il pivot **/
+	
 	private boolean isFreeToInsertAfterRotation(int[][] subMatrix, Couple<Couple<Integer>> fromTo) {
 		Couple<Integer> rows = fromTo.getFirst();
 		Couple<Integer> columns = fromTo.getSecond();
@@ -262,18 +280,19 @@ public class Matrix {
 		return couple;
 	}
 
-	private int[][] fromPositionToSubMatrix() {
+	private int[][] fromPositionToSubMatrix(Couple<Couple<Integer>> fromTo) {
 
 		int matrixDim;
 		int startRow;
 		int startCol;
 
-		if (this.currentTetromino.equals("Tetromino_I")){ /**************************** TODO ************************/
-			matrixDim = 4;
-			startRow = 4;
-			startCol = 4;
+		if (this.currentTetromino.equals("Tetromino_I")){ 
+			Couple<Integer> startCells = this.getStartRowAndColumnForTetromino_I(fromTo);
+			startRow = startCells.getFirst();
+			startCol = startCells.getFirst();
+			matrixDim = 4;	
 		}
-		else{
+		else {
 			matrixDim = 3;
 			startRow = this.coordinates[this.pivotTetromino].getFirst()-1;
 			startCol = this.coordinates[this.pivotTetromino].getSecond()-1;
@@ -281,13 +300,37 @@ public class Matrix {
 
 		int[][] subMatrix = new int[matrixDim][matrixDim];
 
-		for (int r = startRow; r < startRow+3; r++){
-			for (int c = startCol; c < startCol+3; c++){
+		for (int r = startRow; r < startRow+matrixDim; r++){
+			for (int c = startCol; c < startCol+matrixDim; c++){
 				if (this.matrix[r][c]==this.CURRENT)
 					subMatrix[r-startRow][c-startCol] = this.matrix[r][c];
 			}
 		}
 		return subMatrix;
+	}
+	
+	private Couple<Integer> getStartRowAndColumnForTetromino_I(Couple<Couple<Integer>> fromTo){
+		Couple<Integer> rows = fromTo.getFirst();
+		Couple<Integer> columns = fromTo.getSecond();
+		
+		int startRow = rows.getFirst();
+		int startCol = columns.getFirst();
+		
+		switch (this.tetromino_i_state){
+		case 0:
+			startRow--;
+			break;
+		case 1:
+			startCol -= 2;
+			break;
+		case 2:
+			startRow -= 2;
+			break;
+		case 3:	
+			startCol--;
+			break;
+		}
+		return new Couple<Integer>(startRow, startCol);
 	}
 
 	private int[][] rotateAntiClockWise(int[][] subMatrix) {
