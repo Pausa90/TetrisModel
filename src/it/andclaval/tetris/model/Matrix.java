@@ -1,5 +1,9 @@
 package it.andclaval.tetris.model;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 import it.andclaval.tetris.model.tetromino.Tetromino;
 import it.andclaval.tetris.model.tetromino.Tetromino_I;
 import it.andclaval.tetris.tool.Couple;
@@ -154,7 +158,49 @@ public class Matrix {
 
 	/** Controlla se una o più righe si possono svuotare (e le cancella) **/
 	private void cleanRows() {
-		/***********************************************************************************************************************************/
+		int num_row = 0;
+		int[] rows = this.getCurrentRows();
+		boolean allOne;
+		for (int r : rows){
+			
+			allOne = true;
+			//Controllo se sono tutti 1
+			for (int c = 0; c < this.COLUMN; c++){
+				if (this.matrix[r][c] != this.OCCUPIED)
+					allOne = false;
+			}
+			if (allOne){
+				num_row++;
+				this.cleanRow(r);
+			}
+		}
+	}
+
+	private int[] getCurrentRows() {
+		int rows[] = new int[4];
+		for (int i=0; i < this.coordinates.length; i++)
+			rows[i] = this.coordinates[i].getFirst();
+		Arrays.sort(rows);
+		rows = this.reverse(rows);
+		return rows;
+	}
+	
+	private int[] reverse(int[] a) {
+		int[] b = new int[a.length];
+		for (int i = 0; i < b.length; i++)
+			b[i] = a[a.length-1-i];
+		return b;
+	}
+
+	private void cleanRow(int row) {
+		//Traslo i pezzi
+		for (int r = row; r < this.ROW-1; r++)
+			for (int c = 0; c < this.COLUMN; c++)
+				this.matrix[r][c] = this.matrix[r+1][c];
+
+		//Pulisco l'ultima riga
+		for (int c = 0; c < this.COLUMN; c++)
+			this.matrix[this.ROW-1][c] = this.FREE;
 	}
 
 	/** Incrementa la riga di ogni coordinata di 1 **/
@@ -178,7 +224,6 @@ public class Matrix {
 			this.matrix[coord.getFirst()][coord.getSecond()] = status;	
 	}
 
-	/************************************** TODO ottimizzabile con solo il pivot (senza fromTo) ***********************/
 	/** Aggiornamento della matrice al ruotare del pezzo **/
 	public void rotateCurrent(boolean clockWise){
 		Couple<Couple<Integer>> fromTo = this.getMinMaxCoordinates(); //Primo elemento coppia di righe, secondo coppia di colonne
@@ -207,7 +252,7 @@ public class Matrix {
 		int pivot_r;
 		int pivot_c;
 
-		if (this.currentTetromino.equals("Tetromino_I")){ /**************************** TODO ************************/
+		if (this.currentTetromino.equals("Tetromino_I")){ 
 			
 			Couple<Integer> startCells = this.getStartRowAndColumnForTetromino_I(fromTo);
 			startRow = startCells.getFirst();
