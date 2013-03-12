@@ -191,7 +191,7 @@ public class Matrix {
 			b[i] = a[a.length-1-i];
 		return b;
 	}
-/*****************TODO va girato. Le riga con indice basso stanno in alto ********************/
+	
 	private void cleanRow(int row) {
 		//Traslo i pezzi
 		for (int r = row; r >0; r--)
@@ -224,15 +224,15 @@ public class Matrix {
 			this.matrix[coord.getFirst()][coord.getSecond()] = status;	
 	}
 
-	/**TODO fixare problema con 4x4 **/
+	/**TODO fixare rotazione anticlock tetromino_I. Scende mentre ruota **/
 	/** Aggiornamento della matrice al ruotare del pezzo **/
 	public void rotateCurrent(boolean clockWise){
 		Couple<Couple<Integer>> fromTo = this.getMinMaxCoordinates(); //Primo elemento coppia di righe, secondo coppia di colonne
 		int[][] subMatrix;
 		if (this.currentTetromino.equals("Tetromino_O"))
 			return;
-		else 
-			subMatrix = this.fromPositionToSubMatrix(fromTo);  
+		
+		subMatrix = this.fromPositionToSubMatrix(fromTo);  
 		
 		if (clockWise)
 			subMatrix = this.rotateClockWise(subMatrix);
@@ -241,13 +241,13 @@ public class Matrix {
 
 		if (this.isFreeToInsertAfterRotation(subMatrix, fromTo)){
 			this.writeStatus(this.FREE);
-			this.updateCoordinatesAfterRotation(subMatrix, fromTo);
+			this.updateCoordinatesAfterRotation(subMatrix, fromTo, clockWise);
 			this.writeStatus(this.CURRENT);
 		}
 		
 	}
 
-	private void updateCoordinatesAfterRotation(int[][] subMatrix, Couple<Couple<Integer>> fromTo) {
+	private void updateCoordinatesAfterRotation(int[][] subMatrix, Couple<Couple<Integer>> fromTo, boolean clockWise) {
 		int startRow;
 		int startCol;
 		int pivot_r;
@@ -257,12 +257,20 @@ public class Matrix {
 			
 			Couple<Integer> startCells = this.getStartRowAndColumnForTetromino_I(fromTo);
 			startRow = startCells.getFirst();
-			startCol = startCells.getFirst();		
+			startCol = startCells.getSecond();		
 		
 			pivot_r = -1;
 			pivot_c = -1;
 			
-			this.tetromino_i_state = (this.tetromino_i_state + 1) %4; 
+			if(clockWise)
+				this.tetromino_i_state = (this.tetromino_i_state + 1) %4;
+			else{
+				if (this.tetromino_i_state==0)
+					this.tetromino_i_state = 3;
+				else
+					this.tetromino_i_state = (this.tetromino_i_state - 1) %4;
+			}
+			
 		}
 		else{
 			startRow = this.coordinates[this.pivotTetromino].getFirst()-1;
@@ -335,7 +343,7 @@ public class Matrix {
 		if (this.currentTetromino.equals("Tetromino_I")){ 
 			Couple<Integer> startCells = this.getStartRowAndColumnForTetromino_I(fromTo);
 			startRow = startCells.getFirst();
-			startCol = startCells.getFirst();
+			startCol = startCells.getSecond();
 			matrixDim = 4;	
 		}
 		else {
@@ -362,7 +370,7 @@ public class Matrix {
 		int startRow = rows.getFirst();
 		int startCol = columns.getFirst();
 		
-		switch (this.tetromino_i_state){
+		switch (this.tetromino_i_state){//***TODO vedere qua per problema rotazione tetromino_I *******/
 		case 0:
 			startRow--;
 			break;

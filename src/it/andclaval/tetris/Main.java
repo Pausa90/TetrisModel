@@ -20,6 +20,7 @@ public class Main {
 		
 		game.startGame();
 		render.rendering(matrix.getMatrix());
+
 		boolean isGameOver;
 		do {
 			String command = render.input();
