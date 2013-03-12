@@ -191,16 +191,16 @@ public class Matrix {
 			b[i] = a[a.length-1-i];
 		return b;
 	}
-
+/*****************TODO va girato. Le riga con indice basso stanno in alto ********************/
 	private void cleanRow(int row) {
 		//Traslo i pezzi
-		for (int r = row; r < this.ROW-1; r++)
+		for (int r = row; r >0; r--)
 			for (int c = 0; c < this.COLUMN; c++)
-				this.matrix[r][c] = this.matrix[r+1][c];
+				this.matrix[r][c] = this.matrix[r-1][c];
 
 		//Pulisco l'ultima riga
 		for (int c = 0; c < this.COLUMN; c++)
-			this.matrix[this.ROW-1][c] = this.FREE;
+			this.matrix[0][c] = this.FREE;
 	}
 
 	/** Incrementa la riga di ogni coordinata di 1 **/
@@ -224,6 +224,7 @@ public class Matrix {
 			this.matrix[coord.getFirst()][coord.getSecond()] = status;	
 	}
 
+	/**TODO fixare problema con 4x4 **/
 	/** Aggiornamento della matrice al ruotare del pezzo **/
 	public void rotateCurrent(boolean clockWise){
 		Couple<Couple<Integer>> fromTo = this.getMinMaxCoordinates(); //Primo elemento coppia di righe, secondo coppia di colonne
