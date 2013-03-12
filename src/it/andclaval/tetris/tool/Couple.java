@@ -35,4 +35,8 @@ public class Couple<T> {
 		return this.first.equals(tmp.getFirst()) && this.second.equals(tmp.getSecond());
 	}
 	
+	public String toString(){
+		return "(" + this.first + ", " + this.second + ")";
+	}
+	
 }

@@ -224,7 +224,6 @@ public class Matrix {
 			this.matrix[coord.getFirst()][coord.getSecond()] = status;	
 	}
 
-	/**TODO fixare rotazione anticlock tetromino_I. Scende mentre ruota **/
 	/** Aggiornamento della matrice al ruotare del pezzo **/
 	public void rotateCurrent(boolean clockWise){
 		Couple<Couple<Integer>> fromTo = this.getMinMaxCoordinates(); //Primo elemento coppia di righe, secondo coppia di colonne
@@ -232,7 +231,11 @@ public class Matrix {
 		if (this.currentTetromino.equals("Tetromino_O"))
 			return;
 		
-		subMatrix = this.fromPositionToSubMatrix(fromTo);  
+		try {
+			subMatrix = this.fromPositionToSubMatrix(fromTo);
+		} catch (BorderException e) {
+			return;
+		}  
 		
 		if (clockWise)
 			subMatrix = this.rotateClockWise(subMatrix);
@@ -294,7 +297,6 @@ public class Matrix {
 		}
 	}
 
-	
 	private boolean isFreeToInsertAfterRotation(int[][] subMatrix, Couple<Couple<Integer>> fromTo) {
 		Couple<Integer> rows = fromTo.getFirst();
 		Couple<Integer> columns = fromTo.getSecond();
@@ -334,7 +336,7 @@ public class Matrix {
 		return couple;
 	}
 
-	private int[][] fromPositionToSubMatrix(Couple<Couple<Integer>> fromTo) {
+	private int[][] fromPositionToSubMatrix(Couple<Couple<Integer>> fromTo) throws BorderException {
 
 		int matrixDim;
 		int startRow;
@@ -342,24 +344,30 @@ public class Matrix {
 
 		if (this.currentTetromino.equals("Tetromino_I")){ 
 			Couple<Integer> startCells = this.getStartRowAndColumnForTetromino_I(fromTo);
-			startRow = startCells.getFirst();
+			startRow = startCells.getFirst();/**TODO crash ai bordi **/ 
 			startCol = startCells.getSecond();
 			matrixDim = 4;	
 		}
 		else {
 			matrixDim = 3;
+			//il pivot è al centro del quadrato 3x3, quindi dista 1 dai bordi
 			startRow = this.coordinates[this.pivotTetromino].getFirst()-1;
 			startCol = this.coordinates[this.pivotTetromino].getSecond()-1;
 		}
-
+		
 		int[][] subMatrix = new int[matrixDim][matrixDim];
-
+		
+		//Controllo se sto ai bordi
+		if (startCol<0 || startRow<0 || startCol+matrixDim>this.COLUMN|| startRow+matrixDim>this.ROW)
+ 			throw new BorderException();
+		
 		for (int r = startRow; r < startRow+matrixDim; r++){
 			for (int c = startCol; c < startCol+matrixDim; c++){
 				if (this.matrix[r][c]==this.CURRENT)
 					subMatrix[r-startRow][c-startCol] = this.matrix[r][c];
 			}
 		}
+		
 		return subMatrix;
 	}
 	
@@ -370,7 +378,7 @@ public class Matrix {
 		int startRow = rows.getFirst();
 		int startCol = columns.getFirst();
 		
-		switch (this.tetromino_i_state){//***TODO vedere qua per problema rotazione tetromino_I *******/
+		switch (this.tetromino_i_state){
 		case 0:
 			startRow--;
 			break;
@@ -454,4 +462,13 @@ public class Matrix {
 		}
 		return result;
 	}
+}
+
+class BorderException extends Exception{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 }
