@@ -12,14 +12,13 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
 		TetrisGame game = new TetrisGame();
 		TextRendering render = new TextRendering();
 		Matrix matrix = game.getMatrix();
 		
 		game.startGame();
-		render.rendering(matrix.getMatrix());
+		render.rendering(matrix);
 
 		boolean isGameOver;
 		do {
@@ -48,12 +47,46 @@ public class Main {
 						"anticlock || a \t rotate current tetromino to anticlock wise \n");
 			else System.out.println("unknow command, try \"help\"");
 			
-			render.rendering(matrix.getMatrix());
+			render.rendering(matrix);
 			isGameOver = game.isEnd();
 			
 		}
 		while(!isGameOver);
 		System.out.println("Game Over!");
+		
+//		int[] a = {1,2,2,2,3,4,4,5,6};
+//		print(a);
+//		a = reverseAndUnique(a);
+//		print(a);
+	}
+	
+	public static int[] reverseAndUnique(int[] a) {
+		int pred = a[0];
+		int numRip = 0;
+		for (int i = 1; i < a.length; i++){
+			if (a[i]==pred)
+				numRip++;
+			pred = a[i];
+		}
+		int[] b = new int[a.length - numRip];
+		pred = a[a.length-1];
+		b[0] = a[a.length-1];
+		int cell = 1;
+		for (int i = 1; i < a.length; i++){
+			System.out.println("i: " + i + " pos: " + (a.length-1-i) + " pred " + pred);
+			if (a[a.length-1-i]!=pred){
+				b[cell] = a[a.length-1-i];
+				cell++;
+			}
+			pred = a[a.length-1-i];
+		}
+		return b;
+	}
+	
+	public static void print(int[] a){
+		for (int i : a)
+			System.out.print(i + " ");
+		System.out.println();
 	}
 
 }
