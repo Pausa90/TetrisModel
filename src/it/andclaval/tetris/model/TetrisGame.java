@@ -9,7 +9,6 @@ public class TetrisGame {
 	private Tetromino current;
 	private Tetromino next;
 
-	//Da fare singleton (statica)
 	public TetrisGame(){
 		this.matrix = new Matrix(this);
 		this.end = false;
@@ -30,6 +29,18 @@ public class TetrisGame {
 	public void setMatrix(Matrix matrix) {
 		this.matrix = matrix;
 	}
+	
+	public String getCurrentTetrominoName(){
+		return this.current.toString();
+	}
+	
+	public int getCurrentLevel(){
+		return this.matrix.getLevel();
+	}
+	
+	public String getNextTetromino(){
+		return this.next.toString();
+	}
 
 	/** Metodo di avvio del gioco **/
 	public void startGame(){
@@ -43,8 +54,8 @@ public class TetrisGame {
 		this.matrix.putTetromino(current);
 	}
 	
-	public void update(){
-		this.matrix.update();
+	public boolean update(){
+		return this.matrix.update();
 	}
 	
 	public void rotateClockWise(){

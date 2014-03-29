@@ -28,4 +28,8 @@ public abstract class Tetromino {
 		return this.pivot;
 	}
 	
+	public String toString(){
+		return this.getClass().getName();
+	}
+	
 }

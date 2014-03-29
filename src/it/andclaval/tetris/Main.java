@@ -18,7 +18,7 @@ public class Main {
 		Matrix matrix = game.getMatrix();
 		
 		game.startGame();
-		render.rendering(matrix);
+		render.rendering(matrix, game.getNextTetromino());
 
 		boolean isGameOver;
 		do {
@@ -47,7 +47,7 @@ public class Main {
 						"anticlock || a \t rotate current tetromino to anticlock wise \n");
 			else System.out.println("unknow command, try \"help\"");
 			
-			render.rendering(matrix);
+			render.rendering(matrix, game.getNextTetromino());
 			isGameOver = game.isEnd();
 			
 		}

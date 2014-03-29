@@ -6,13 +6,13 @@ import java.util.Scanner;
 
 public class TextRendering {
 	
-	public void rendering(Matrix m_class){
+	public void rendering(Matrix m_class, String nextTetromino){
 		int[][] matrix = m_class.getMatrix();
 		//scrivo gli indici delle colonne
 		System.out.println("Lv: " + m_class.getLevel() + " Righe per lv up: " + m_class.getRowsToLevelUp());
 		System.out.println("Score: " + m_class.getScore());
 		System.out.println("Combo: #linee = " + m_class.getCombo() + " #hit = " + m_class.getComboInfo()[1]);
-		
+		System.out.println("Next Tetromino: " + nextTetromino);
 		int i;
 		System.out.print("\t");
 		for (i=0; i<matrix[0].length; i++){
