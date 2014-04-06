@@ -195,12 +195,14 @@ public class Matrix {
 		}
 	} 
 	
-	private void updateLevel(int num_row) {
+	private boolean updateLevel(int num_row) {
 		this.levelInfo[1] += num_row;
 		if (this.levelInfo[1] > this.NUM_ROW_TO_LEVEL_UP){
 			this.levelInfo[0]++;
 			this.levelInfo[1] -= this.NUM_ROW_TO_LEVEL_UP;
+			return true;
 		}
+		return false;
 	}
 
 	private void updateScore(int num_row) {
